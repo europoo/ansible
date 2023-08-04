@@ -1,0 +1,59 @@
+---
+- name: My playbook
+  hosts: localhost
+  vars_files:
+    - my_name.yml
+  vars:
+    my_name: "Lee"
+    repo_url: https://gitlab.com/Reece-Elder/devops-m5-rds.git
+    package_name: "unzip"
+    new_file: "/home/ubuntu/ansible/example.txt"
+    append_text: "This is an example"
+  vars_prompt:
+    - name: "package_name"
+      prompt: "Enter the package name to install"
+    - name: "append_text"
+      prompt: "Enter the text to append in the file"
+
+  tasks:
+    - name: print name
+      debug:
+        msg: "{{ my_name }}"
+
+    - name: install package
+      become: yes
+      package:
+        name: "{{ package_name | default('unzip', package_name is not defined or package_name == '') }}"
+        state: present
+
+    - name: git clone
+      git:
+        repo: "{{ repo_url }}"
+        dest: "~/devops-m5-rds"
+
+    - name: install nginx
+      become: yes
+      package:
+        name: nginx
+        state: present
+      notify:
+        - restart nginx
+
+    - name: create new new_file
+      file:
+        path: "{{ new_file }}"
+        state: touch
+
+    - name: append text
+      lineinfile:
+        path: "{{ new_file }}"
+        line: "{{ append_text }}"
+        state: present
+        create: true
+
+  handlers:
+    - name: restart nginx
+      become: yes
+      service:
+        name: nginx
+        state: restarted
