@@ -1,0 +1,23 @@
+---
+- hosts: demo
+  tasks:
+  - name: Install packages
+    become: yes
+    apt:
+      name: 
+        - wget
+        - unzip
+      state: present
+      update_cache: true
+
+
+- hosts: nginx
+  tasks:
+  - name: Install packages
+    become: yes
+    apt:
+      name: 
+        - wget
+        - nginx
+      state: present
+      update_cache: true
